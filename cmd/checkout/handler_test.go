@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"testing"
 
@@ -9,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	mockcheckout "github.com/matnich89/checkoutkata/internal/checkout/mocks"
+	"github.com/matnich89/checkoutkata/internal/model"
 )
 
 func TestScan(t *testing.T) {
@@ -44,11 +47,23 @@ func TestTotal(t *testing.T) {
 	server := newTestServer(t, app.routes())
 	defer server.Close()
 
-	t.Run("should return 200", func(t *testing.T) {
+	t.Run("should return total and return 200", func(t *testing.T) {
+		m.EXPECT().GetTotalPrice().Return(100)
 		req, _ := http.NewRequest(http.MethodGet, server.URL+"/checkout/total", nil)
 		resp, err := server.Client().Do(req)
 		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, resp.StatusCode)
+
+		b, err := io.ReadAll(resp.Body)
+
+		var totalResponse model.TotalResponse
+
+		err = json.Unmarshal(b, &totalResponse)
+
+		require.NoError(t, err)
+
+		require.Equal(t, 100, totalResponse.Total)
+
 	})
 
 }

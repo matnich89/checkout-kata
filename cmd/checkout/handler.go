@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+
+	"github.com/matnich89/checkoutkata/internal/model"
 )
 
 func (a *app) ScanItem(w http.ResponseWriter, r *http.Request) {
@@ -23,5 +26,21 @@ func (a *app) ScanItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *app) GetItemTotal(w http.ResponseWriter, r *http.Request) {
+	totalPrice := a.checkout.GetTotalPrice()
+
+	response := model.TotalResponse{Total: totalPrice}
+
+	b, err := json.Marshal(response)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(b)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 
 }

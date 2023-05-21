@@ -10,3 +10,7 @@ type SpecialPrice struct {
 	AmountRequired int
 	Price          int
 }
+
+type TotalResponse struct {
+	Total int `json:"total"`
+}
