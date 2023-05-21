@@ -1,7 +1,6 @@
 package checkout
 
 import (
-	"checkoutkata/internal/model"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -18,6 +17,52 @@ func TestScan(t *testing.T) {
 		err := checkout.Scan("Z")
 		require.Error(t, err)
 	})
+
+	t.Run("should scan multiple available items", func(t *testing.T) {
+
+		checkout = NewStandardCheckout(setupItems())
+
+		err := scanItemNoOfTimes(checkout, "A", 2)
+		require.NoError(t, err)
+
+		err = checkout.Scan("B")
+		require.NoError(t, err)
+
+		scannedAItems := checkout.currentScannedItems["A"]
+		scannedBItems := checkout.currentScannedItems["B"]
+
+		require.Equal(t, scannedAItems, 2)
+		require.Equal(t, scannedBItems, 1)
+	})
+
+	t.Run("should scan multiple available items handle any order", func(t *testing.T) {
+		checkout = NewStandardCheckout(setupItems())
+
+		err := checkout.Scan("B")
+		require.NoError(t, err)
+
+		err = checkout.Scan("A")
+		require.NoError(t, err)
+
+		err = checkout.Scan("B")
+		require.NoError(t, err)
+
+		err = checkout.Scan("C")
+		require.NoError(t, err)
+
+		err = checkout.Scan("A")
+		require.NoError(t, err)
+
+		scannedAItems := checkout.currentScannedItems["A"]
+		scannedBItems := checkout.currentScannedItems["B"]
+		scannedCItems := checkout.currentScannedItems["C"]
+
+		require.Equal(t, scannedAItems, 2)
+		require.Equal(t, scannedBItems, 2)
+		require.Equal(t, scannedCItems, 1)
+
+	})
+
 }
 
 func TestGetTotal(t *testing.T) {
@@ -27,10 +72,8 @@ func TestGetTotal(t *testing.T) {
 	t.Run("should calculate items with no special price correctly", func(t *testing.T) {
 
 		checkout = NewStandardCheckout(setupItems())
-
-		checkout.Scan("C")
-		checkout.Scan("C")
-		checkout.Scan("C")
+		err := scanItemNoOfTimes(checkout, "C", 3)
+		require.NoError(t, err)
 
 		total := checkout.GetTotalPrice()
 
@@ -39,9 +82,9 @@ func TestGetTotal(t *testing.T) {
 
 	t.Run("should calculate items with special prices correctly", func(t *testing.T) {
 		checkout = NewStandardCheckout(setupItems())
-		checkout.Scan("A")
-		checkout.Scan("A")
-		checkout.Scan("A")
+
+		err := scanItemNoOfTimes(checkout, "A", 3)
+		require.NoError(t, err)
 
 		total := checkout.GetTotalPrice()
 
@@ -51,10 +94,8 @@ func TestGetTotal(t *testing.T) {
 	t.Run("should calculate items with special prices correctly with items remaining", func(t *testing.T) {
 		checkout = NewStandardCheckout(setupItems())
 
-		checkout.Scan("A")
-		checkout.Scan("A")
-		checkout.Scan("A")
-		checkout.Scan("A")
+		err := scanItemNoOfTimes(checkout, "A", 4)
+		require.NoError(t, err)
 
 		total := checkout.GetTotalPrice()
 
@@ -62,36 +103,28 @@ func TestGetTotal(t *testing.T) {
 
 	})
 
-}
+	t.Run("should calculate items with special prices correctly with items remaining and with multi special price applied", func(t *testing.T) {
+		checkout = NewStandardCheckout(setupItems())
 
-func setupItems() []model.Item {
-	itemA := model.Item{
-		SKU:       "A",
-		UnitPrice: 50,
-		SpecialPrice: &model.SpecialPrice{
-			AmountRequired: 3,
-			Price:          130,
-		},
-	}
+		err := scanItemNoOfTimes(checkout, "A", 7)
+		require.NoError(t, err)
 
-	itemB := model.Item{
-		SKU:       "B",
-		UnitPrice: 30,
-		SpecialPrice: &model.SpecialPrice{
-			AmountRequired: 2,
-			Price:          45,
-		},
-	}
+		total := checkout.GetTotalPrice()
 
-	itemC := model.Item{
-		SKU:       "C",
-		UnitPrice: 20,
-	}
+		require.Equal(t, 310, total)
+	})
 
-	itemD := model.Item{
-		SKU:       "D",
-		UnitPrice: 15,
-	}
+	t.Run("should calculate items with special prices correctly with items remaining and with multi special price applied", func(t *testing.T) {
+		checkout = NewStandardCheckout(setupItems())
 
-	return []model.Item{itemA, itemB, itemC, itemD}
+		err := scanItemNoOfTimes(checkout, "A", 7)
+		require.NoError(t, err)
+
+		err = scanItemNoOfTimes(checkout, "B", 2)
+		require.NoError(t, err)
+
+		total := checkout.GetTotalPrice()
+
+		require.Equal(t, 355, total)
+	})
 }
