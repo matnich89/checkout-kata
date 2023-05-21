@@ -25,7 +25,7 @@ func (a *app) ScanItem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *app) GetItemTotal(w http.ResponseWriter, r *http.Request) {
+func (a *app) GetTotal(w http.ResponseWriter, r *http.Request) {
 	totalPrice := a.checkout.GetTotalPrice()
 
 	response := model.TotalResponse{Total: totalPrice}
