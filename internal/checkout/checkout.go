@@ -19,8 +19,9 @@ func NewStandardCheckout(initialItems []model.Item) *StandardCheckout {
 
 	availableItems := map[string]*model.Item{}
 
-	for _, it := range initialItems {
-		availableItems[it.SKU] = &it
+	for i := 0; i < len(initialItems); i++ {
+		item := initialItems[i]
+		availableItems[item.SKU] = &item
 	}
 
 	return &StandardCheckout{
@@ -40,5 +41,25 @@ func (c *StandardCheckout) Scan(itemSku string) error {
 }
 
 func (c *StandardCheckout) GetTotalPrice() int {
-	return 0
+	var total int
+
+	for sku, amount := range c.currentScannedItems {
+		item := c.availableItems[sku]
+		total += calculateTotalForItem(item, amount)
+	}
+
+	return total
+}
+
+func calculateTotalForItem(item *model.Item, amount int) int {
+
+	var itemTotal int
+
+	if item.SpecialPrice != nil {
+
+	} else {
+		itemTotal = item.UnitPrice * amount
+	}
+
+	return itemTotal
 }

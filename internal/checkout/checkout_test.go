@@ -21,11 +21,33 @@ func TestScan(t *testing.T) {
 }
 
 func TestGetTotal(t *testing.T) {
-	checkout := NewStandardCheckout(setupItems())
 
-	total := checkout.GetTotalPrice()
+	var checkout Checkout
 
-	require.Equal(t, 0, total)
+	t.Run("should calculate items with no special price correctly", func(t *testing.T) {
+
+		checkout = NewStandardCheckout(setupItems())
+
+		checkout.Scan("C")
+		checkout.Scan("C")
+		checkout.Scan("C")
+
+		total := checkout.GetTotalPrice()
+
+		require.Equal(t, 60, total)
+	})
+
+	t.Run("should calculate items with special prices correctly", func(t *testing.T) {
+		checkout = NewStandardCheckout(setupItems())
+		checkout.Scan("A")
+		checkout.Scan("A")
+		checkout.Scan("A")
+
+		total := checkout.GetTotalPrice()
+
+		require.Equal(t, 0, total)
+	})
+
 }
 
 func setupItems() []model.Item {
