@@ -48,6 +48,20 @@ func TestGetTotal(t *testing.T) {
 		require.Equal(t, 130, total)
 	})
 
+	t.Run("should calculate items with special prices correctly with items remaining", func(t *testing.T) {
+		checkout = NewStandardCheckout(setupItems())
+
+		checkout.Scan("A")
+		checkout.Scan("A")
+		checkout.Scan("A")
+		checkout.Scan("A")
+
+		total := checkout.GetTotalPrice()
+
+		require.Equal(t, 180, total)
+
+	})
+
 }
 
 func setupItems() []model.Item {
