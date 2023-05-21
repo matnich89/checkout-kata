@@ -1,6 +1,6 @@
 package checkout
 
-import "checkoutkata/internal/model"
+import "github.com/matnich89/checkoutkata/internal/model"
 
 func scanItemNoOfTimes(checkout Checkout, itemSKU string, times int) error {
 	for i := 0; i < times; i++ {

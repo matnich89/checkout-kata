@@ -1,8 +1,8 @@
 package checkout
 
 import (
-	"checkoutkata/internal/model"
 	"fmt"
+	"github.com/matnich89/checkoutkata/internal/model"
 )
 
 type Checkout interface {
