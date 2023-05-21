@@ -56,7 +56,8 @@ func calculateTotalForItem(item *model.Item, amount int) int {
 	var itemTotal int
 
 	if item.SpecialPrice != nil {
-
+		numberOfSpecialPrices := item.SpecialPrice.AmountRequired / amount
+		itemTotal += item.SpecialPrice.Price * numberOfSpecialPrices
 	} else {
 		itemTotal = item.UnitPrice * amount
 	}

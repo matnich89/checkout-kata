@@ -45,7 +45,7 @@ func TestGetTotal(t *testing.T) {
 
 		total := checkout.GetTotalPrice()
 
-		require.Equal(t, 0, total)
+		require.Equal(t, 130, total)
 	})
 
 }
